@@ -1,3 +1,4 @@
+/*
 package service
 
 import io.grpc.{ManagedChannel, ManagedChannelBuilder, Status, StatusRuntimeException}
@@ -75,3 +76,4 @@ class UserService(wishListRepo: WishListRepository, userRepo: UserRepository, se
 }
 
 case object UserNotFoundException extends RuntimeException
+*/

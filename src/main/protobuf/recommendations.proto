@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package proto;
+
+import "product.proto";
+
+service RecommendationsService {
+    rpc analyzeUser (AnalyzeUserRequest) returns (AnalyzeUserResponse) {}
+    rpc isActive   (PingRequest) returns (PingReply) {}
+}
+
+// Analyze user to check for recommendations
+message AnalyzeUserRequest {
+    int64 userId = 1;
+}
+
+message AnalyzeUserResponse {
+    repeated ProductReply productId = 1;
+}
+
+message PingRequest {
+
+}
+
+message PingReply {
+    string response = 1;
+}

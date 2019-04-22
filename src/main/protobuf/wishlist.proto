@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package proto;
+
+import "product.proto";
+
+service WishListService {
+    rpc addProduct (AddProductRequest) returns (AddProductResponse) {}
+    rpc getProducts (GetProductsRequest) returns (GetProductsResponse) {}
+    rpc deleteProduct (DeleteProductRequest) returns (DeleteProductResponse) {}
+}
+
+message AddProductRequest {
+    int64 productId = 1;
+    int64 userId = 2;
+}
+
+message AddProductResponse {
+    int64 productId = 1;
+}
+
+message GetProductsRequest {
+    int64 userId = 1;
+}
+
+message GetProductsResponse {
+    repeated ProductReply products = 1;
+}
+
+message DeleteProductRequest {
+    int64 userId = 1;
+    int64 productId = 2;
+}
+
+message DeleteProductResponse {
+    int64 productId = 1;
+}

@@ -1,10 +1,12 @@
 syntax = "proto3";
 
-package product;
+package proto;
 
 service ProductService {
     rpc GetProduct (ProductRequest) returns (ProductReply) {}
     rpc NewProduct (NewProductRequest) returns (ProductReply) {}
+    rpc GetProductsByCategory (GetProductsByCategoryRequest) returns (GetProductsByCategoryReply) {}
+
 }
 
 message ProductRequest {
@@ -15,9 +17,19 @@ message ProductReply {
     int64 id = 1;
     string name = 2;
     string description = 3;
+    string category = 4;
 }
 
 message NewProductRequest {
     string name = 1;
     string description = 2;
+    string category = 3;
+}
+
+message GetProductsByCategoryRequest {
+    string category = 1;
+}
+
+message GetProductsByCategoryReply {
+    repeated ProductReply products = 1;
 }
