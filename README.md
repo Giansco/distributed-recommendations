@@ -1,4 +1,4 @@
-# distributed-products
+# distributed-recommendations
 
 To run etcd in a docker
 
