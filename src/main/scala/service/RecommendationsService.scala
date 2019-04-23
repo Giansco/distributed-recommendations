@@ -12,6 +12,16 @@ import scala.util.{Failure, Success, Try}
 
 class RecommendationsService(serviceManager: ServiceManager)(implicit ec: ExecutionContext) extends RecommendationsServiceGrpc.RecommendationsService {
 
+  //TODO How to choose a master, how to call chooseUserToAnalyze of master automatically every x amount of time
+
+  /**
+    * The master chooses a user to analyze every x amount of time (frequency set in registry)
+    * Tengo que guardar los usuarios ya procesados, donde los guardo?
+    */
+  def chooseUserToAnalyze(): Unit ={
+    //TODO implement
+  }
+
   override def analyzeUser(request: AnalyzeUserRequest): Future[AnalyzeUserResponse] = {
     getWishListStub.flatMap(stub => {
 

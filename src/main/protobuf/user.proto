@@ -6,6 +6,7 @@ service UserService {
     rpc addUser (AddUserRequest) returns (AddUserResponse) {}
     rpc getUser (GetUserRequest) returns (GetUserResponse) {}
     rpc getUsers (GetUsersRequest) returns (GetUsersResponse) {}
+    rpc getInactiveUsers (GetInactiveUsersRequest) returns (GetInactiveUsersResponse) {}
     rpc updateUser (UpdateUserRequest) returns (UpdateUserResponse) {}
     rpc deleteUser (DeleteUserRequest) returns (DeleteUserResponse) {}
 }
@@ -33,6 +34,14 @@ message GetUsersRequest {
 
 message GetUsersResponse {
     repeated GetUserResponse users = 1;
+}
+
+message GetInactiveUsersRequest {
+
+}
+
+message GetInactiveUsersResponse {
+    repeated int64 userIds = 1;
 }
 
 message AddUserResponse {

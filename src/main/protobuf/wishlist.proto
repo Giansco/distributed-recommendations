@@ -7,6 +7,7 @@ import "product.proto";
 service WishListService {
     rpc addProduct (AddProductRequest) returns (AddProductResponse) {}
     rpc getProducts (GetProductsRequest) returns (GetProductsResponse) {}
+    rpc getRecentUsers (GetRecentUsersRequest) returns (GetRecentUsersResponse) {}
     rpc deleteProduct (DeleteProductRequest) returns (DeleteProductResponse) {}
 }
 
@@ -25,6 +26,14 @@ message GetProductsRequest {
 
 message GetProductsResponse {
     repeated ProductReply products = 1;
+}
+
+message GetRecentUsersRequest {
+
+}
+
+message GetRecentUsersResponse {
+    repeated int64 userIds = 1;
 }
 
 message DeleteProductRequest {
