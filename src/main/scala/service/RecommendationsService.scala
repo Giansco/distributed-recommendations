@@ -186,7 +186,7 @@ class RecommendationsService(serviceManager: ServiceManager)(implicit ec: Execut
     }
   }
 
-  private def getUserStub: Future[UserServiceGrpc.UserService] = {
+  /*private def getUserStub: Future[UserServiceGrpc.UserService] = {
     // Check how user services are registered in etcd
     serviceManager.getAddress("user").map{
       case Some(value) =>
@@ -197,7 +197,7 @@ class RecommendationsService(serviceManager: ServiceManager)(implicit ec: Execut
         UserServiceGrpc.stub(channel)
       case None => throw new RuntimeException("No user services running")
     }
-  }
+  }*/
 
   private def getMailStub: Future[MailServiceGrpc.MailService] = {
     // Check how user services are registered in etcd

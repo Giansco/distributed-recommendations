@@ -10,7 +10,7 @@ service MailService {
 
 message MailRequest {
     int64 userId = 1;
-    repeated ProductReply productsId = 2;
+    repeated ProductReply products = 2;
 
 }
 
