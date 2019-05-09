@@ -44,6 +44,8 @@ class ServiceManager { // Is ServiceManager only used by one service?
     future
   }
 
+  // Does it ever return if nothing is found?
+  // Doesn't return if no value is found
   def getAddress(url: String): Future[Option[AddressWithPort]] = {
     val future = client.kvService.getRange(url).map(res => {
       val quantity = res.count

@@ -3,6 +3,7 @@ package service
 import io.grpc.{ManagedChannel, ManagedChannelBuilder, Status, StatusRuntimeException}
 import proto.product.{GetProductsByCategoryReply, GetProductsByCategoryRequest, ProductReply, ProductServiceGrpc}
 import proto.recommendations._
+import proto.user.UserServiceGrpc
 import proto.wishlist.{GetProductsRequest, GetProductsResponse, WishListServiceGrpc}
 import server.ServiceManager
 
@@ -22,7 +23,11 @@ class RecommendationsService(serviceManager: ServiceManager)(implicit ec: Execut
     //TODO implement
     println("I'm being called")
     val userId = 1
-    analyzeUser(AnalyzeUserRequest(userId)) // Calling it on himself
+
+    // Here we should call any recommendation service.
+    getRecommendationsStub.flatMap( stub => {
+      stub.analyzeUser(AnalyzeUserRequest(userId))
+    })
   }
 
   override def analyzeUser(request: AnalyzeUserRequest): Future[AnalyzeUserResponse] = {
@@ -124,6 +129,19 @@ class RecommendationsService(serviceManager: ServiceManager)(implicit ec: Execut
           .build()
         WishListServiceGrpc.stub(channel)
       case None => throw new RuntimeException("No wishlist services running")
+    }
+  }
+
+  private def getUserStub: Future[UserServiceGrpc.UserService] = {
+    // Check how user services are registered in etcd
+    serviceManager.getAddress("user").map{
+      case Some(value) =>
+        println(value.port)
+        val channel: ManagedChannel = ManagedChannelBuilder.forAddress(value.address, value.port)
+          .usePlaintext(true)
+          .build()
+        UserServiceGrpc.stub(channel)
+      case None => throw new RuntimeException("No user services running")
     }
   }
 
