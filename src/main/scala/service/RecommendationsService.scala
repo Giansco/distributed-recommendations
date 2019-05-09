@@ -1,15 +1,16 @@
 package service
 
 import io.grpc.{ManagedChannel, ManagedChannelBuilder, Status, StatusRuntimeException}
+import proto.mail.{MailReply, MailRequest, MailServiceGrpc}
 import proto.product.{GetProductsByCategoryReply, GetProductsByCategoryRequest, ProductReply, ProductServiceGrpc}
 import proto.recommendations._
 import proto.user.UserServiceGrpc
-import proto.wishlist.{GetProductsRequest, GetProductsResponse, WishListServiceGrpc}
+import proto.wishlist._
 import server.ServiceManager
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Random, Success, Try}
 
 class RecommendationsService(serviceManager: ServiceManager)(implicit ec: ExecutionContext) extends RecommendationsServiceGrpc.RecommendationsService {
 
@@ -19,14 +20,67 @@ class RecommendationsService(serviceManager: ServiceManager)(implicit ec: Execut
   /**
     * The master chooses a user to analyze every x amount of time (frequency set in registry)
     */
-  override def chooseUserToAnalyze(request: ChooseUserRequest): Future[AnalyzeUserResponse] ={
+  override def chooseUserToAnalyze(request: ChooseUserRequest): Future[ChooseUserReply] ={
     //TODO implement
     println("I'm being called")
-    val userId = 1
 
+    // Here we get recent users from wishlist
+    getWishListStub.flatMap( stub => {
+      val result: Future[GetRecentUsersResponse] = stub.getRecentUsers(GetRecentUsersRequest())
+
+      val result2: Future[Seq[Long]] = result.map( r => r.userIds )
+
+      val future: Try[Seq[Long]] = Await.ready(result2, Duration.apply(5, "second")).value.get
+
+      future  match {
+        case Success(value) => tellStubToAnalyzeUser(Random.shuffle(value).head)
+        case Failure(exception: StatusRuntimeException) =>
+          if(exception.getStatus.getCode == Status.Code.UNAVAILABLE) {
+            println("Get another stub")
+            chooseUserToAnalyze(request)
+          } else throw exception
+      }
+    })
+
+
+  }
+
+  private def tellStubToAnalyzeUser(userId: Long): Future[ChooseUserReply] ={
     // Here we should call any recommendation service.
     getRecommendationsStub.flatMap( stub => {
-      stub.analyzeUser(AnalyzeUserRequest(userId))
+      val result: Future[AnalyzeUserResponse] = stub.analyzeUser(AnalyzeUserRequest(userId))
+
+      val result2: Future[Seq[ProductReply]] = result.map( r => r.products )
+
+      val future: Try[Seq[ProductReply]] = Await.ready(result2, Duration.apply(5, "second")).value.get
+
+      future  match {
+        case Success(value) => sendMail(userId, value)
+        case Failure(exception: StatusRuntimeException) =>
+          if(exception.getStatus.getCode == Status.Code.UNAVAILABLE) {
+            println("Get another stub")
+            tellStubToAnalyzeUser(userId)
+          } else throw exception
+      }
+    })
+  }
+
+  private def sendMail(userId: Long, products: Seq[ProductReply]): Future[ChooseUserReply] = {
+    getMailStub.flatMap( stub => {
+      val result: Future[MailReply] = stub.sendMail(MailRequest(userId, products))
+
+      val result2: Future[String] = result.map( r => r.response )
+
+      val future: Try[String] = Await.ready(result2, Duration.apply(5, "second")).value.get
+
+      future  match {
+        case Success(_) => Future.successful(ChooseUserReply())
+        case Failure(exception: StatusRuntimeException) =>
+          if(exception.getStatus.getCode == Status.Code.UNAVAILABLE) {
+            println("Get another stub")
+            sendMail(userId, products)
+          } else throw exception
+      }
     })
   }
 
@@ -141,6 +195,19 @@ class RecommendationsService(serviceManager: ServiceManager)(implicit ec: Execut
           .usePlaintext(true)
           .build()
         UserServiceGrpc.stub(channel)
+      case None => throw new RuntimeException("No user services running")
+    }
+  }
+
+  private def getMailStub: Future[MailServiceGrpc.MailService] = {
+    // Check how user services are registered in etcd
+    serviceManager.getAddress("mail").map{
+      case Some(value) =>
+        println(value.port)
+        val channel: ManagedChannel = ManagedChannelBuilder.forAddress(value.address, value.port)
+          .usePlaintext(true)
+          .build()
+        MailServiceGrpc.stub(channel)
       case None => throw new RuntimeException("No user services running")
     }
   }

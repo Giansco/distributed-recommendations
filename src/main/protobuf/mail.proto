@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package proto;
+
+import "product.proto";
+
+service MailService {
+    rpc SendMail (MailRequest) returns (MailReply) {}
+}
+
+message MailRequest {
+    int64 userId = 1;
+    repeated ProductReply productsId = 2;
+
+}
+
+message MailReply {
+    string response = 1;
+}

@@ -7,7 +7,7 @@ import "product.proto";
 service RecommendationsService {
     rpc analyzeUser (AnalyzeUserRequest) returns (AnalyzeUserResponse) {}
     rpc isActive   (PingRequest) returns (PingReply) {}
-    rpc chooseUserToAnalyze (ChooseUserRequest) returns (AnalyzeUserResponse) {}
+    rpc chooseUserToAnalyze (ChooseUserRequest) returns (ChooseUserReply) {}
 }
 
 // Analyze user to check for recommendations
@@ -16,7 +16,7 @@ message AnalyzeUserRequest {
 }
 
 message AnalyzeUserResponse {
-    repeated ProductReply productId = 1;
+    repeated ProductReply products = 1;
 }
 
 message PingRequest {
