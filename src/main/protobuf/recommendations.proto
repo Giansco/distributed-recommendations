@@ -7,6 +7,7 @@ import "product.proto";
 service RecommendationsService {
     rpc analyzeUser (AnalyzeUserRequest) returns (AnalyzeUserResponse) {}
     rpc isActive   (PingRequest) returns (PingReply) {}
+    rpc chooseUserToAnalyze (ChooseUserRequest) returns (AnalyzeUserResponse) {}
 }
 
 // Analyze user to check for recommendations
@@ -24,4 +25,12 @@ message PingRequest {
 
 message PingReply {
     string response = 1;
+}
+
+message ChooseUserRequest {
+
+}
+
+message ChooseUserReply {
+
 }

@@ -11,9 +11,9 @@ object RecommendationServer extends App {
   implicit val ec: ExecutionContextExecutor = ExecutionContext.global
 
   val stubManager = new ServiceManager
-  stubManager.startConnection("0.0.0.0", 50001, "recommendations")
+  stubManager.startConnection("0.0.0.0", 50002, "recommendations")
 
-  val server = ServerBuilder.forPort(50001)
+  val server = ServerBuilder.forPort(50002)
   .addService(RecommendationsServiceGrpc.bindService(new RecommendationsService(stubManager), ExecutionContext.global))
   .build()
 

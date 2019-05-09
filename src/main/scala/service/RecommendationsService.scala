@@ -14,12 +14,15 @@ class RecommendationsService(serviceManager: ServiceManager)(implicit ec: Execut
 
   //TODO How to choose a master, how to call chooseUserToAnalyze of master automatically every x amount of time
 
+  // Tengo que guardar los usuarios ya procesados, donde los guardo?
   /**
     * The master chooses a user to analyze every x amount of time (frequency set in registry)
-    * Tengo que guardar los usuarios ya procesados, donde los guardo?
     */
-  def chooseUserToAnalyze(): Unit ={
+  override def chooseUserToAnalyze(request: ChooseUserRequest): Future[AnalyzeUserResponse] ={
     //TODO implement
+    println("I'm being called")
+    val userId = 1
+    analyzeUser(AnalyzeUserRequest(userId)) // Calling it on himself
   }
 
   override def analyzeUser(request: AnalyzeUserRequest): Future[AnalyzeUserResponse] = {

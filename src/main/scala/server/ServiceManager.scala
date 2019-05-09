@@ -2,10 +2,12 @@ package server
 
 import com.google.gson.Gson
 import com.google.protobuf.ByteString
+import io.grpc.{ManagedChannel, ManagedChannelBuilder}
 import io.grpc.stub.StreamObserver
 import org.etcd4s.pb.etcdserverpb._
 import org.etcd4s.pb.v3electionpb.CampaignRequest
 import org.etcd4s.{Etcd4sClient, Etcd4sClientConfig}
+import proto.recommendations.{ChooseUserRequest, RecommendationsServiceGrpc}
 
 import scala.concurrent.Future
 import scala.util.Random
@@ -19,9 +21,10 @@ class ServiceManager { // Is ServiceManager only used by one service?
   val tts = 1
   private val client = getClient
   private val id: Long = Random.nextLong() // This might need to be moved to another place
-  // If the service
+  private var url: String = ""
 
   def startConnection(address: String, port: Int, url: String): Future[PutResponse] = {
+    this.url = url // We need to save the url somehow
     val response = client.rpcClient.leaseRpc.leaseGrant(LeaseGrantRequest(tts, id))
     val leaseId = response.map(_.iD)
     val future: Future[PutResponse] = response.flatMap(v => {
@@ -109,7 +112,17 @@ class ServiceManager { // Is ServiceManager only used by one service?
     * This action can only be executed by the leader
     */
   private def leaderAction(): Unit = {
-    println("I'm doing leader stuff")
+    println("I'm doing leader stuff") //REMOVE
+    // This should probably be saved when starting the connection
+    getAddress(this.url + "/" + id).map{
+      case Some(value) =>
+        val channel: ManagedChannel = ManagedChannelBuilder.forAddress(value.address, value.port)
+          .usePlaintext(true)
+          .build()
+        RecommendationsServiceGrpc.stub(channel).chooseUserToAnalyze(ChooseUserRequest())
+      // most likely it should never be None
+      case None => throw new RuntimeException("This service is not running")
+    }
   }
 
   /** Creates a loop that will execute the leaderAction after some time
