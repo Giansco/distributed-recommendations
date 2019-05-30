@@ -22,9 +22,12 @@ class ServiceManager { // Is ServiceManager only used by one service?
   private val client = getClient
   private val id: Long = Random.nextLong() // This might need to be moved to another place
   private var url: String = ""
+  var recommendationTime: Int = 0
+  //implicit val recommendationTime: Int = 4000
 
-  def startConnection(address: String, port: Int, url: String): Future[PutResponse] = {
+  def startConnection(address: String, port: Int, url: String, recommendationTime: Int): Future[PutResponse] = {
     this.url = url // We need to save the url somehow
+    this.recommendationTime = recommendationTime
     val response = client.rpcClient.leaseRpc.leaseGrant(LeaseGrantRequest(tts, id))
     val leaseId = response.map(_.iD)
     val future: Future[PutResponse] = response.flatMap(v => {
@@ -134,7 +137,8 @@ class ServiceManager { // Is ServiceManager only used by one service?
   private def leaderLoop(): Unit = {
     leaderAction()
     Future {
-      Thread.sleep(tts * 6000) // in milliseconds
+      println(recommendationTime) // REMOVE
+      Thread.sleep(tts * recommendationTime) // in milliseconds
       leaderLoop()
     }
   }
